@@ -2,9 +2,11 @@
   "name": "Travel Watch",
   "shortName":"Travel Watch",
   "icon": "app.png",
-  "version":"1.00",
+  "version":"0.01",
   "description": "Watch face that shows world wide times",
-  "tags": "",
+  "tags": "clock",
+  "type": "clock",
+  "supports": ["BANGLEJS2"],
   "storage": [
     {"name":"travel.app.js","url":"app.js"},
     {"name":"travel.img","url":"app-icon.js","evaluate":true}
