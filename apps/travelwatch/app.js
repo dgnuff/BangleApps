@@ -62,11 +62,16 @@ function DateToDow(year, month, day)
 
 // Returns the day of month of the first "dow" day starting from the date in the given month and year.
 // Negative date values mean count from end of month, so -7 is the last Xday, -14 is the seconds to last, etc.
-function YearToStartEndDay(year, month, date, dow)
+function YearToStartEndDay(year, month, day, dow)
 {
-    const firstPossibleDay = date < 0 ? DaysInMonth(year, month) + 1 + date : date;
+    // Get the first possible day in the month that the change can happen, based on the day parameter.
+    const firstPossibleDay = day < 0 ? DaysInMonth(year, month) + 1 + day : day;
+    // Get the day of week of the first possible day
     const dowOfFirstPossible = DateToDow(year, month, firstPossibleDay);
+    // Determine how many days we need to advance from the first possible to arrive at a day that
+    // is the appropriate day of the week
     const daysToAdvance = (7 + dow - dowOfFirstPossible) % 7;
+    // Final result is the first possible plus the number of days advanced.
     return firstPossibleDay + daysToAdvance;
 }
 
@@ -208,7 +213,7 @@ function draw()
     }
 
     // Now render the time in the currently selected other zone
-    date = GetDate(zoneIndex)
+    date = GetDate(zoneIndex);
 
     y = 154;
     g.setColor(0, 0, 0).fillRect(0, y - 14, 176, y + 10);
@@ -259,7 +264,7 @@ Bangle.drawWidgets();
 Bangle.on("touch", onTouch);
 
 // Make sure the middle button works properly
-setUI({mode:"clock"});
+//setUI({mode:"clock"});
 
 ComputeCurrentOffsets(0, zones.length);
 ComputeNextChanges(0, zones.length);
