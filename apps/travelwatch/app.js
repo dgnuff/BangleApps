@@ -23,16 +23,40 @@ Graphics.prototype.setFontOxaniumText = function() {
   );
 };
 
-const dows = 
+const dows =
 [
     "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
 ];
 
-var zones = require("Storage").readJSON("timezones.json", 1) || [ { "name": "LON", "offset": 480 } ];
+var zones =
+/* require("Storage").readJSON("timezones.json", 1) || */ [
+    { "name": "SFO", "offset": 480, "current_offset": 25200, "next_change": 0, "dst_month": 3, "dst_date":  8, "dst_dow": 0, "dst_hour": 2, "std_month": 11, "std_date":  1, "std_dow": 0, "std_hour": 2 },
+    { "name": "LON", "offset":   0, "current_offset":     0, "next_change": 0, "dst_month": 3, "dst_date": -7, "dst_dow": 0, "dst_hour": 1, "std_month": 10, "std_date": -7, "std_dow": 0, "std_hour": 2 },
+];
+
+
+function ComputeCurrentOffsets()
+{
+}
+
+function ComputeNextChanges()
+{
+}
+
+function GetDate(idx)
+{
+    var date = new Date();
+//var foo = date.getTime();
+//var off = zones[idx].current_offset;
+    date.setTime(date.getTime() + zones[idx].current_offset);
+//var bar = date.getTime();
+//print("" + foo + " " + off + " " + bar + "\n");
+    return date;
+}
 
 function draw()
 {
-    var date = new Date();
+    var date = GetDate(0);
 
     //print("Draw at " + ("" + date.getHours()).padStart(2, '0') + ":" + ("" + date.getMinutes()).padStart(2, '0') + ":" + ("" + date.getSeconds()).padStart(2, '0'));
 
@@ -118,5 +142,9 @@ Bangle.drawWidgets();
 // Handle touch events
 Bangle.on("touch", onTouch);
 
+ComputeCurrentOffsets();
+ComputeNextChanges();
+
 // Draw immediately.  Subsequent draw() calls are scheduled from within draw() and onTouch()
 draw();
+
