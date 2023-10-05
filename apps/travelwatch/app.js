@@ -30,8 +30,8 @@ const dows =
 
 var zones =
 /* require("Storage").readJSON("timezones.json", 1) || */ [
-    { "name": "SFO", "offset": -480, "current_offset": -25200000, "next_change": 0, "dst_month": 3, "dst_date":  8, "dst_dow": 0, "dst_hour": 2, "std_month": 11, "std_date":  1, "std_dow": 0, "std_hour": 2 },
-    { "name": "LON", "offset":    0, "current_offset":         0, "next_change": 0, "dst_month": 3, "dst_date": -7, "dst_dow": 0, "dst_hour": 1, "std_month": 10, "std_date": -7, "std_dow": 0, "std_hour": 2 },
+    { "name": "SFO", "offset": 480, "current_offset": 25200, "next_change": 0, "dst_month": 3, "dst_date":  8, "dst_dow": 0, "dst_hour": 2, "std_month": 11, "std_date":  1, "std_dow": 0, "std_hour": 2 },
+    { "name": "LON", "offset":   0, "current_offset":     0, "next_change": 0, "dst_month": 3, "dst_date": -7, "dst_dow": 0, "dst_hour": 1, "std_month": 10, "std_date": -7, "std_dow": 0, "std_hour": 2 },
 ];
 
 
@@ -43,19 +43,12 @@ function ComputeNextChanges()
 {
 }
 
-function Render(date)
-{
-    print("" + date.getYear()) + "/" + ("" + (date.GetMonth() + 1)).padStart(2, '0') + "/" + ("" + date.getDate()).padStart(2, '0') + " " +
-        ("" + date.getHours()).padStart(2, '0') + ":" + ("" + date.getMinutes()).padStart(2, '0') + ":" + ("" + date.getSeconds()).padStart(2, '0'));
-}
-
 function GetDate(idx)
 {
     var date = new Date();
-//Render(date);
+//var foo = date.getTime();
 //var off = zones[idx].current_offset;
     date.setTime(date.getTime() + zones[idx].current_offset);
-//Render(date);
 //var bar = date.getTime();
 //print("" + foo + " " + off + " " + bar + "\n");
     return date;
