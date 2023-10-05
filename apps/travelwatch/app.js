@@ -28,7 +28,7 @@ const dows =
     "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
 ];
 
-var zones = require("storage").readJSON("timezones.json", 1) || [ { "name": "LON", "offset": 480 } ];
+var zones = require("Storage").readJSON("timezones.json", 1) || [ { "name": "LON", "offset": 480 } ];
 
 function draw()
 {
