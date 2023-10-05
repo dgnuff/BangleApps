@@ -30,42 +30,139 @@ const dows =
 
 var zones =
 /* require("Storage").readJSON("timezones.json", 1) || */ [
-    { "name": "SFO", "offset": -480, "current_offset": -25200000, "next_change": 0, "dst_month": 3, "dst_date":  8, "dst_dow": 0, "dst_hour": 2, "std_month": 11, "std_date":  1, "std_dow": 0, "std_hour": 2 },
-    { "name": "LON", "offset":    0, "current_offset":         0, "next_change": 0, "dst_month": 3, "dst_date": -7, "dst_dow": 0, "dst_hour": 1, "std_month": 10, "std_date": -7, "std_dow": 0, "std_hour": 2 },
+    { "name": "SFO", "offset": -480, "current_offset": 0, "next_change": 0, "is_dst": false, "dst_month": 3, "dst_date":  8, "dst_dow": 0, "dst_hour": 2, "std_month": 11, "std_date":  1, "std_dow": 0, "std_hour": 2 },
+    { "name": "LON", "offset":    0, "current_offset": 0, "next_change": 0, "is_dst": false, "dst_month": 3, "dst_date": -7, "dst_dow": 0, "dst_hour": 1, "std_month": 10, "std_date": -7, "std_dow": 0, "std_hour": 2 },
 ];
 
-
-function ComputeCurrentOffsets()
+function DaysInMonth(year, month)
 {
+    // Given the limited use case of this, I'm not sure we need the February logic.  As far as I can tell,
+    // there isn't a jurisdiction anywhere on Earth that changes to or from daylight savings in February.
+    // It's generally March or April.  But this is left in for the sake of completeness.
+    if (month == 2)
+    {
+        return year % 4 == 0 && year % 100 != 0 || year % 400 == 0 ? 29 : 28;
+    }
+    else
+    {
+        return month == 4 || month == 6 || month == 9 || month == 11 ? 30 : 31;
+    }
 }
 
-function ComputeNextChanges()
+// Standard Zeller's congruence
+function DateToDow(year, month, day)
 {
+    if (month < 3)
+    {
+        month += 12;
+        year--;
+    }
+    return (day + Math.floor(((month + 1) * 13) / 5) + 6 + year + Math.floor(year / 4) - Math.floor(year / 100) + Math.floor(year / 400)) % 7;
 }
 
-function Render(date)
+// Returns the day of month of the first "dow" day starting from the date in the given month and year.
+// Negative date values mean count from end of month, so -7 is the last Xday, -14 is the seconds to last, etc.
+function YearToStartEndDay(year, month, date, dow)
 {
-    print("" + date.getYear()) + "/" + ("" + (date.GetMonth() + 1)).padStart(2, '0') + "/" + ("" + date.getDate()).padStart(2, '0') + " " +
-        ("" + date.getHours()).padStart(2, '0') + ":" + ("" + date.getMinutes()).padStart(2, '0') + ":" + ("" + date.getSeconds()).padStart(2, '0'));
+    const firstPossibleDay = date < 0 ? DaysInMonth(year, month) + 1 + date : date;
+    const dowOfFirstPossible = DateToDow(year, month, firstPossibleDay);
+    const daysToAdvance = (7 + dow - dowOfFirstPossible) % 7;
+    return firstPossibleDay + daysToAdvance;
 }
+
+// Determine if a year, month, day, hour quartet are in DST for the zone idx
+function TimeIsDst(year, month, day, hours, idx)
+{
+    var zone = zones[idx];
+    // if both months are the same, this zone doesn't observe DST
+    if (zone.dst_month == zone.std_month)
+    {
+        return false;
+    }
+    // We need to know if we're in the nothern hemisphere or not.  That can be determined by the
+    // relative order of the two months
+    var nothernHemisphere = zone.dst_month < zone.std_month;
+    if (nothernHemisphere && month > zone.dst_month && month < zone.std_month)
+    {
+        return true;
+    }
+    if (!nothernHemisphere && (month < zone.std_month || month > zone.dst_month))
+    {
+        return true;
+    }
+    if (month == zone.dst_month)
+    {
+        // In the month when DST starts.  Get the date in the month when DST actually starts
+        const dstDay = YearToStartEndDay(year, zone.dst_month, zone.dst_date, zone.dst_dow);
+        // and if we'er after that day, or on that day but after the hour, then it's DST
+        if (day > dstDay || day == dstDay && hours >= zone.dst_hour)
+        {
+            return true;
+        }
+    }
+    if (month == zone.std_month)
+    {
+        // Likewise for the month when DST ends
+        const stdDay = YearToStartEndDay(year, zone.std_month, zone.std_date, zone.std_dow);
+        if (day < stdDay || day == stdDay && hours < zone.std_hour - 1)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+// The current offset and next change logic is pretty expensive.  However it's run very infrequently:
+// once at startup, and then after that only two times a year.
+
+// Evaluate offsets for the specified zone(s)
+function ComputeCurrentOffsets(first, last)
+{
+    const now = new Date();
+    const utcMilliSeconds = now.getTime();
+    for (idx = first; idx < last; idx++)
+    {
+        var zoneOffset = zones[idx].offset * 60000;             // zone offset is in minutes: convert to milliseconds
+        var zoneMilliSeconds = utcMilliSeconds + zoneOffset;
+        var date = new Date();
+        date.setTime(zoneMilliSeconds);
+        if (TimeIsDst(date.getFullYear(), date.getMonth() + 1, date.getDate(), date.getHours(), idx))
+        {
+            zones[idx].current_offset = zoneOffset + 3600000;
+            zones[idx].is_dst = true;
+        }
+        else
+        {
+            zones[idx].current_offset = zoneOffset;
+            zones[idx].is_dst = false;
+        }
+    }
+}
+
+function ComputeNextChanges(first, last)
+{
+    const now = new Date();
+    for (idx = first; idx < last; idx++)
+    {
+    }
+}
+
+//function Render(date)
+//{
+//    print("" + date.getYear() + "/" + ("" + (date.GetMonth() + 1)).padStart(2, '0') + "/" + ("" + date.getDate()).padStart(2, '0') + " " +
+//        ("" + date.getHours()).padStart(2, '0') + ":" + ("" + date.getMinutes()).padStart(2, '0') + ":" + ("" + date.getSeconds()).padStart(2, '0'));
+//}
 
 function GetDate(idx)
 {
     var date = new Date();
-//Render(date);
-//var off = zones[idx].current_offset;
     date.setTime(date.getTime() + zones[idx].current_offset);
-//Render(date);
-//var bar = date.getTime();
-//print("" + foo + " " + off + " " + bar + "\n");
     return date;
 }
 
 function draw()
 {
     var date = GetDate(0);
-
-    //print("Draw at " + ("" + date.getHours()).padStart(2, '0') + ":" + ("" + date.getMinutes()).padStart(2, '0') + ":" + ("" + date.getSeconds()).padStart(2, '0'));
 
     var y = 66;
 
@@ -104,22 +201,34 @@ function draw()
         var month = date.getMonth() + 1;
         var dateStr = "" + month + "/" + ("" + date.getDate()).padStart(2, '0');
         // Move this a little left or right depending on whether the
-        // month is one or two characters.  This has the net result of
-        // always rendering the slash in the same place.
+        // month is one or two digits.  This has the net result of always
+        // rendering the slash in the same place.
         var x = month >= 10 ? 129 : 139;
         g.drawString(dateStr, x, y);
     }
 
-    var zoneMinutes = (minutes + hours * 60 + zones[zoneIndex].offset + 1440) % 1440;
-    var zoneHours = Math.floor(zoneMinutes / 60);
-    zoneMinutes = zoneMinutes % 60;
+    // Now render the time in the currently selected other zone
+    date = GetDate(zoneIndex)
 
     y = 154;
     g.setColor(0, 0, 0).fillRect(0, y - 14, 176, y + 10);
 
     g.setColor(1, 1, 0).drawString(zones[zoneIndex].name, 39, y);
-    var zoneTimeStr = ("" + zoneHours).padStart(2, '0') + ":" + ("" + zoneMinutes).padStart(2, '0');
+    var zoneTimeStr = ("" + date.getHours()).padStart(2, '0') + ":" + ("" + date.getMinutes()).padStart(2, '0');
     g.drawString(zoneTimeStr, 131, y);
+
+    // For all zones, check if they observe DST, and if so check if their next chage time has passed.
+    // If so, compute the new offset, and the time of the next change after this one.
+    const now = new Date();
+    const currentMilliSeconds = now.getTime();
+    for (idx = 0; idx < zones.length; idx++)
+    {
+        if (false && zones[idx].dst_month != zones[idx].std_month && currentMilliSeconds >= zones[idx].next_change)
+        {
+            ComputeCurrentOffsets(idx, idx + 1);
+            ComputeNextChanges(idx, idx + 1);
+        }
+    }
 
     // Figure how many milliseconds we need to delay to
     // get to the top of the next minute.  Add 5 so this
@@ -133,7 +242,7 @@ function onTouch(button, xy)
 {
     if (++zoneIndex >= zones.length)
     {
-        zoneIndex = 0;
+        zoneIndex = 1;
     }
     clearTimeout(drawTimeout);
     draw();
@@ -141,7 +250,7 @@ function onTouch(button, xy)
 
 // Clear the screen once, at startup
 g.clear().setColor(0, 0, 0).fillRect(0, 0, 176, 176);
-zoneIndex = 0;
+zoneIndex = 1;
 
 Bangle.loadWidgets();
 Bangle.drawWidgets();
@@ -149,8 +258,11 @@ Bangle.drawWidgets();
 // Handle touch events
 Bangle.on("touch", onTouch);
 
-ComputeCurrentOffsets();
-ComputeNextChanges();
+// Make sure the middle button works properly
+setUI({mode:"clock"});
+
+ComputeCurrentOffsets(0, zones.length);
+ComputeNextChanges(0, zones.length);
 
 // Draw immediately.  Subsequent draw() calls are scheduled from within draw() and onTouch()
 draw();

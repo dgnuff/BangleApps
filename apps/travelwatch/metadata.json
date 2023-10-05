@@ -2,7 +2,7 @@
   "name": "Travel Watch",
   "shortName":"Travel Watch",
   "icon": "app.png",
-  "version":"0.09",
+  "version":"0.10",
   "description": "Watch face that shows world wide time for travelers",
   "tags": "clock",
   "type": "clock",
