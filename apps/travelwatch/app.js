@@ -264,7 +264,7 @@ Bangle.drawWidgets();
 Bangle.on("touch", onTouch);
 
 // Make sure the middle button works properly
-//setUI({mode:"clock"});
+Bangle.setUI({mode:"clock"});
 
 ComputeCurrentOffsets(0, zones.length);
 ComputeNextChanges(0, zones.length);
