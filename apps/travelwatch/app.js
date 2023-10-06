@@ -28,8 +28,8 @@ const dows =
     "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
 ];
 
-var zones =
-/* require("Storage").readJSON("timezones.json", 1) || */ [
+var zones = require("Storage").readJSON("timezones.json", 1) ||
+[
     { "name": "SFO", "offset": -480, "current_offset": 0, "next_change": 0, "is_dst": false, "dst_month": 3, "dst_date":  8, "dst_dow": 0, "dst_hour": 2, "std_month": 11, "std_date":  1, "std_dow": 0, "std_hour": 2 },
     { "name": "LON", "offset":    0, "current_offset": 0, "next_change": 0, "is_dst": false, "dst_month": 3, "dst_date": -7, "dst_dow": 0, "dst_hour": 1, "std_month": 10, "std_date": -7, "std_dow": 0, "std_hour": 2 },
 ];
