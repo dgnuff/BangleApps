@@ -158,10 +158,13 @@ function ComputeNextChanges(first, last)
 //        ("" + date.getHours()).padStart(2, '0') + ":" + ("" + date.getMinutes()).padStart(2, '0') + ":" + ("" + date.getSeconds()).padStart(2, '0'));
 //}
 
+// We use GetDate() to get dates for rendering, since takes care of both the various timezones in use, and automatic switching between
+// daylight and standard times.  Rather than rely on the TZ offset stored in the watch, we start by removing that, and then applying our
+// idea of the offset.
 function GetDate(idx)
 {
     var date = new Date();
-    date.setTime(date.getTime() + zones[idx].current_offset);
+    date.setTime(date.getTime() + date.getTimezoneOffset() * 60000 + zones[idx].current_offset);
     return date;
 }
 
@@ -214,17 +217,13 @@ function draw()
 
     // Now render the time in the currently selected other zone
     date = GetDate(zoneIndex);
-    date = new Date();
-    offset = date.getTimezoneOffset();
 
     y = 154;
     g.setColor(0, 0, 0).fillRect(0, y - 14, 176, y + 10);
 
-    g.setColor(1, 1, 0); // .drawString(zones[zoneIndex].name, 39, y);
+    g.setColor(1, 1, 0).drawString(zones[zoneIndex].name, 39, y);
     var zoneTimeStr = ("" + date.getHours()).padStart(2, '0') + ":" + ("" + date.getMinutes()).padStart(2, '0');
-    //g.drawString(zoneTimeStr, 131, y);
-
-    g.drawString("" + offset, 88, y);
+    g.drawString(zoneTimeStr, 131, y);
 
     // For all zones, check if they observe DST, and if so check if their next chage time has passed.
     // If so, compute the new offset, and the time of the next change after this one.
