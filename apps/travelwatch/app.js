@@ -214,13 +214,17 @@ function draw()
 
     // Now render the time in the currently selected other zone
     date = GetDate(zoneIndex);
+    date = new Date();
+    offset = date.getTimezoneOffset();
 
     y = 154;
     g.setColor(0, 0, 0).fillRect(0, y - 14, 176, y + 10);
 
-    g.setColor(1, 1, 0).drawString(zones[zoneIndex].name, 39, y);
+    g.setColor(1, 1, 0); // .drawString(zones[zoneIndex].name, 39, y);
     var zoneTimeStr = ("" + date.getHours()).padStart(2, '0') + ":" + ("" + date.getMinutes()).padStart(2, '0');
-    g.drawString(zoneTimeStr, 131, y);
+    //g.drawString(zoneTimeStr, 131, y);
+
+    g.drawString("" + offset, 88, y);
 
     // For all zones, check if they observe DST, and if so check if their next chage time has passed.
     // If so, compute the new offset, and the time of the next change after this one.
