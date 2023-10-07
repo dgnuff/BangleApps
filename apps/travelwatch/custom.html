@@ -81,7 +81,7 @@
               <td><select name="zone_${i}" id="zone_${i}">`
           for (var j = 0; j < timeZones.length; j++)
           {
-              innerHTML += '<option value="${j}"'
+              innerHTML += '<option value="' + j + '"'
               if (offsets[i][2] == j)
               {
                   innerHTML += ' selected=true'
