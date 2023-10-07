@@ -1,0 +1,114 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="../../css/spectre.min.css">
+  </head>
+  <body>
+
+      <p>You can add up to 4 timezones. Please give a name and UTC offset in hours.
+      If you want less than 4, clear the checkbox to the left.</p>
+
+      <table id="travelwatch-offsets">
+          <tr>
+          <th>Enabled?</th>
+          <th>Name</th>
+          <th>UTC Offset</th>
+          </tr>
+      </table>
+
+    <p>Click <button id="upload" class="btn btn-primary">Upload</button></p>
+
+    <script src="../../core/lib/customize.js"></script>
+
+    <script>
+      const timeZones = [
+      { "name": "pacific/honolulu",      "offset": -600, "dst_month": 0, "dst_date":  0, "dst_dow": 0, "dst_hour": 0, "std_month":  0, "std_date":  0, "std_dow": 0, "std_hour": 0 },
+      { "name": "america/anchorage",     "offset": -540, "dst_month": 3, "dst_date":  8, "dst_dow": 0, "dst_hour": 2, "std_month": 11, "std_date":  1, "std_dow": 0, "std_hour": 2 },
+      { "name": "america/los_angeles",   "offset": -480, "dst_month": 3, "dst_date":  8, "dst_dow": 0, "dst_hour": 2, "std_month": 11, "std_date":  1, "std_dow": 0, "std_hour": 2 },
+      { "name": "america/phoenix",       "offset": -420, "dst_month": 0, "dst_date":  0, "dst_dow": 0, "dst_hour": 0, "std_month":  0, "std_date":  0, "std_dow": 0, "std_hour": 0 },
+      { "name": "america/denver",        "offset": -420, "dst_month": 3, "dst_date":  8, "dst_dow": 0, "dst_hour": 2, "std_month": 11, "std_date":  1, "std_dow": 0, "std_hour": 2 },
+      { "name": "america/chicago",       "offset": -360, "dst_month": 3, "dst_date":  8, "dst_dow": 0, "dst_hour": 2, "std_month": 11, "std_date":  1, "std_dow": 0, "std_hour": 2 },
+      { "name": "america/new_york",      "offset": -300, "dst_month": 3, "dst_date":  8, "dst_dow": 0, "dst_hour": 2, "std_month": 11, "std_date":  1, "std_dow": 0, "std_hour": 2 },
+      { "name": "america/sao_paulo",     "offset": -180, "dst_month": 0, "dst_date":  0, "dst_dow": 0, "dst_hour": 0, "std_month":  0, "std_date":  0, "std_dow": 0, "std_hour": 0 },
+      { "name": "europe/london",         "offset":    0, "dst_month": 3, "dst_date": -7, "dst_dow": 0, "dst_hour": 1, "std_month": 10, "std_date": -7, "std_dow": 0, "std_hour": 2 },
+      { "name": "europe/lisbon",         "offset":    0, "dst_month": 3, "dst_date": -7, "dst_dow": 0, "dst_hour": 1, "std_month": 10, "std_date": -7, "std_dow": 0, "std_hour": 2 },
+      { "name": "europe/berlin",         "offset":   60, "dst_month": 3, "dst_date": -7, "dst_dow": 0, "dst_hour": 2, "std_month": 10, "std_date": -7, "std_dow": 0, "std_hour": 3 },
+      { "name": "europe/athens",         "offset":  120, "dst_month": 3, "dst_date": -7, "dst_dow": 0, "dst_hour": 3, "std_month": 10, "std_date": -7, "std_dow": 0, "std_hour": 4 },
+      { "name": "africa/johannesburg",   "offset":  120, "dst_month": 0, "dst_date":  0, "dst_dow": 0, "dst_hour": 0, "std_month":  0, "std_date":  0, "std_dow": 0, "std_hour": 0 },
+      { "name": "asia/jerusalem",        "offset":  120, "dst_month": 3, "dst_date": -9, "dst_dow": 5, "dst_hour": 2, "std_month": 10, "std_date": -7, "std_dow": 0, "std_hour": 2 },
+      { "name": "asia/tokyo",            "offset":  540, "dst_month": 0, "dst_date":  0, "dst_dow": 0, "dst_hour": 0, "std_month":  0, "std_date":  0, "std_dow": 0, "std_hour": 0 },
+      { "name": "australia/sydney",      "offset":  600, "dst_month": 0, "dst_date":  1, "dst_dow": 0, "dst_hour": 2, "std_month":  4, "std_date":  1, "std_dow": 0, "std_hour": 2 },
+      { "name": "australia/brisbane",    "offset":  600, "dst_month": 0, "dst_date":  0, "dst_dow": 0, "dst_hour": 0, "std_month":  0, "std_date":  0, "std_dow": 0, "std_hour": 0 },
+      { "name": "australia/adelaide",    "offset":  570, "dst_month": 0, "dst_date":  1, "dst_dow": 0, "dst_hour": 2, "std_month":  4, "std_date":  1, "std_dow": 0, "std_hour": 2 },
+      { "name": "australia/darwin",      "offset":  570, "dst_month": 0, "dst_date":  0, "dst_dow": 0, "dst_hour": 0, "std_month":  0, "std_date":  0, "std_dow": 0, "std_hour": 0 },
+      { "name": "australia/perth",       "offset":  480, "dst_month": 0, "dst_date":  0, "dst_dow": 0, "dst_hour": 0, "std_month":  0, "std_date":  0, "std_dow": 0, "std_hour": 0 },
+      { "name": "etc/utc",               "offset":    0, "dst_month": 0, "dst_date":  0, "dst_dow": 0, "dst_hour": 0, "std_month":  0, "std_date":  0, "std_dow": 0, "std_hour": 0 }
+      ]
+
+      var offsets = [];
+      try
+      {
+          var stored = localStorage.getItem('travelwatch-offset-list')
+          if (stored)
+          {
+              offsets = JSON.parse(stored);
+          }
+          if (!offsets || offsets.length != 4)
+          {
+              throw "Offsets invalid";
+          }
+      }
+      catch(e)
+      {
+          offsets = [
+                [true,  "LON", "europe/london"    ],
+                [true,  "ZRC", "europe/berlin"    ],
+                [false, "JER", "asia/jerusalem"   ],
+                [false, "SYD", "australia/sydney" ],
+           ];
+        }
+      console.log(offsets);
+      var tbl = document.getElementById("travelwatch-offsets");
+      for (var i = 0; i < 4; i++)
+      {
+          var $offset = document.createElement('tr')
+          var innerHTML = `
+              <td><input type="checkbox" id="enabled_${i}" ${offsets[i][0]? "checked" : ""}></td>
+              <td><input type="text" id="name_${i}" value="${offsets[i][1]}"></td>
+              <td><select name="zone" id="zone_${i}">`
+          for (var j = 0; j < timeZones.length; j++)
+          {
+              innerHTML = innerHTML + '<option value="${j}">${timeZones[j].name}</option>';
+          }
+          innerHTML = innerHTML + '</select>';
+          $offset.innerHTML = innerHTML;
+          tbl.append($offset);
+      }
+
+      // When the 'upload' button is clicked...
+      document.getElementById("upload").addEventListener("click", function() {
+          var storage_offsets=[];
+          var app_offsets=[];
+          for (var i=0; i<4; i++) {
+              var checked=document.getElementById("enabled_"+i).checked;
+              var name=document.getElementById("name_"+i).value;
+              var offset=document.getElementById("offset_"+i).value;
+              if (checked) {
+                  app_offsets.push({"name":name,"offset":offset]);
+              }
+              storage_offsets.push([checked,name,offset]);
+          }
+          console.log(storage_offsets);
+          console.log(app_offsets);
+          console.log(JSON.stringify(app_offsets));
+        localStorage.setItem('travelwatch-offset-list',JSON.stringify(storage_offsets));
+        // send finished app (in addition to contents of app.json)
+        sendCustomizedApp({
+          storage:[
+            {name:"timezones.json", content:JSON.stringify(app_offsets)},
+          ]
+        });
+      });
+
+    </script>
+  </body>
+</html>
