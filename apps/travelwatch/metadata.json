@@ -6,6 +6,7 @@
   "tags": "clock",
   "type": "clock",
   "supports": ["BANGLEJS2"],
+  "custom": "custom.html",
   "storage": [
     {"name":"travelwatch.app.js","url":"app.js"},
     {"name":"travelwatch.img","url":"app-icon.js","evaluate":true}
