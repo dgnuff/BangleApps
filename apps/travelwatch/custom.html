@@ -14,7 +14,7 @@
           <tr>
           <th>Enabled?</th>
           <th>Name</th>
-          <th>UTC Offset</th>
+          <th>Time Zone</th>
           </tr>
       </table>
 
@@ -118,7 +118,7 @@
                   zoneData.is_dst = false;
                   app_offsets.push(zoneData);
               }
-              storage_offsets.push([checked,name,offset]);
+              storage_offsets.push([checked,name,zone]);
           }
           console.log(storage_offsets);
           console.log(app_offsets);
