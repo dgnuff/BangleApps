@@ -4,8 +4,11 @@
   </head>
   <body>
 
-      <p>You can add up to 4 timezones. Please give a name and UTC offset in hours.
-      If you want less than 4, clear the checkbox to the left.</p>
+      <p>You can add up to 5 timezones. Please give a name and time zone.
+      If you want less than 5, clear the checkbox to the left. Note that the
+      first two are always sent, even if not checked, since the watch face
+      requires a minimum of two timezones.  The first one is the watches
+      displayed time, the second through fifth are other times zones</p>
 
       <table id="travelwatch-offsets">
           <tr>
@@ -83,7 +86,7 @@
               {
                   innerHTML += ' selected=true'
               }
-              innerHTML += '>${timeZones[j].name}</option>';
+              innerHTML += ">${timeZones[j].name}</option>";
           }
           innerHTML += '</select>';
           $offset.innerHTML = innerHTML;
@@ -121,11 +124,11 @@
           console.log(JSON.stringify(app_offsets));
         localStorage.setItem('travelwatch-offset-list',JSON.stringify(storage_offsets));
         // send finished app (in addition to contents of app.json)
-        sendCustomizedApp({
-          storage:[
-            {name:"timezones.json", content:JSON.stringify(app_offsets)},
-          ]
-        });
+        //sendCustomizedApp({
+        //  storage:[
+        //    {name:"timezones.json", content:JSON.stringify(app_offsets)},
+        //  ]
+        //});
       });
 
     </script>
