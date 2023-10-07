@@ -1,7 +1,7 @@
 { "id": "travelwatch",
   "name": "Travel Watch",
   "icon": "app.png",
-  "version":"0.16",
+  "version":"0.17",
   "description": "Watch face that shows world wide time for travelers",
   "tags": "clock",
   "type": "clock",

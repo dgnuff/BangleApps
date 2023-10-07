@@ -1,4 +1,4 @@
-var lastTime;
+                                                                                        var lastTime;
 var lastDow;
 var drawTimeout;
 var zoneIndex;
@@ -40,7 +40,7 @@ var zones = require("Storage").readJSON("timezones.json", 1) ||
 function GetDate(idx)
 {
     var date = new Date();
-    const zoneOffset = idx >= 0 && idx < zones.length ? zones[idx].current_offset : 0
+    const zoneOffset = idx >= 0 && idx < zones.length ? zones[idx].current_offset : 0;
     date.setTime(date.getTime() + date.getTimezoneOffset() * 60000 + zoneOffset);
     return date;
 }
@@ -137,6 +137,7 @@ function ComputeOffsetAndChange(first, last)
     for (idx = first; idx < last; idx++)
     {
         var date = GetDate(idx);
+        const zoneOffset = zones[idx].offset * 60000;
         if (TimeIsDst(date.getFullYear(), date.getMonth() + 1, date.getDate(), date.getHours(), idx))
         {
             zones[idx].current_offset = zoneOffset + 3600000;
@@ -260,3 +261,4 @@ ComputeOffsetAndChange(0, zones.length);
 
 // Draw immediately.  Subsequent draw() calls are scheduled from within draw() and onTouch()
 draw();
+
