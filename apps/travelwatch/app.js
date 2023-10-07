@@ -1,4 +1,3 @@
-                                                                                        var lastTime;
 var lastDow;
 var drawTimeout;
 var zoneIndex;
@@ -34,7 +33,7 @@ var zones = require("Storage").readJSON("timezones.json", 1) ||
     { "name": "LON", "offset":    0, "current_offset": 0, "next_change": 0, "is_dst": false, "dst_month": 3, "dst_date": -7, "dst_dow": 0, "dst_hour": 1, "std_month": 10, "std_date": -7, "std_dow": 0, "std_hour": 2 },
 ];
 
-// We use GetDate  () to get dates for rendering, since takes care of both the various timezones in use, and automatic switching between
+// We use GetDate() to get dates for rendering, since it takes care of both the various timezones in use, and automatic switching between
 // daylight and standard times.  Rather than rely on the TZ offset stored in the watch, we start by removing that, and then applying our
 // idea of the offset.  ixd == -1 causes it to return a UTC Date object.
 function GetDate(idx)
@@ -60,7 +59,7 @@ function DaysInMonth(year, month)
     }
 }
 
-// Standard Zeller's congruence
+// Zeller's congruence
 function DateToDow(year, month, date)
 {
     if (month < 3)
@@ -71,9 +70,10 @@ function DateToDow(year, month, date)
     return (date + Math.floor(((month + 1) * 13) / 5) + 6 + year + Math.floor(year / 4) - Math.floor(year / 100) + Math.floor(year / 400)) % 7;
 }
 
-// Returns the day of month of the first "dow" day starting from the date in the given month and year.
-// Negative date values mean count from end of month, so -7 is the last Xday, -14 is the seconds to last, etc.
-function YearToStartEndDay(year, month, date, dow)
+// Get the actual date in the year / month that DST starts or ends, based on the year, months, a "date" and a
+// day of week.  The date is the first date within the month when the change can occur.  Negative date values
+// mean count backwards from the end of the month, so -7 is the last "dowDay", -14 is the seconds to last, etc.
+function GetStartEndDay(year, month, date, dow)
 {
     // Get the first possible date in the month that the change can happen, based on the date parameter.
     const firstPossibleDate = date < 0 ? DaysInMonth(year, month) + 1 + date : date;
@@ -97,7 +97,7 @@ function TimeIsDst(year, month, date, hours, idx)
     }
     // We need to know if we're in the nothern hemisphere or not.  That can be determined by the
     // relative order of the two months
-    var nothernHemisphere = zone.dst_month < zone.std_month;
+    const nothernHemisphere = zone.dst_month < zone.std_month;
     if (nothernHemisphere && month > zone.dst_month && month < zone.std_month)
     {
         return true;
@@ -109,7 +109,7 @@ function TimeIsDst(year, month, date, hours, idx)
     if (month == zone.dst_month)
     {
         // We're in the month when DST starts.  Get the date in the month when DST actually starts
-        const dstDate = YearToStartEndDay(year, zone.dst_month, zone.dst_date, zone.dst_dow);
+        const dstDate = GetStartEndDay(year, zone.dst_month, zone.dst_date, zone.dst_dow);
         // and if we'er after that day, or on that day but after the hour, then it's DST
         if (date > dstDate || date == dstDate && hours >= zone.dst_hour)
         {
@@ -119,7 +119,7 @@ function TimeIsDst(year, month, date, hours, idx)
     if (month == zone.std_month)
     {
         // Likewise for the month when DST ends
-        const stdDate = YearToStartEndDay(year, zone.std_month, zone.std_date, zone.std_dow);
+        const stdDate = GetStartEndDay(year, zone.std_month, zone.std_date, zone.std_dow);
         if (date < stdDate || date == stdDate && hours < zone.std_hour - 1)
         {
             return true;
@@ -128,7 +128,7 @@ function TimeIsDst(year, month, date, hours, idx)
     return false;
 }
 
-// The current offset and next change logic is pretty expensive.  However it's run very infrequently:
+// The offset and change logic is pretty expensive.  However it's run very infrequently:
 // once at startup, and then after that only two times a year for each zone
 
 // Evaluate offsets for the specified zone(s)
@@ -136,8 +136,10 @@ function ComputeOffsetAndChange(first, last)
 {
     for (idx = first; idx < last; idx++)
     {
-        var date = GetDate(idx);
-        const zoneOffset = zones[idx].offset * 60000;
+        const zone = zones[idx];
+        const date = GetDate(idx);
+        const zoneOffset = zone.offset * 60000;
+        const nothernHemisphere = zone.dst_month < zone.std_month;
         if (TimeIsDst(date.getFullYear(), date.getMonth() + 1, date.getDate(), date.getHours(), idx))
         {
             zones[idx].current_offset = zoneOffset + 3600000;
@@ -148,18 +150,62 @@ function ComputeOffsetAndChange(first, last)
             zones[idx].current_offset = zoneOffset;
             zones[idx].is_dst = false;
         }
+        var yearOfNextChange;
+        if (nothernHemisphere == zone.is_dst)
+        {
+            // If we're in the northern hemisphere and we've just entered DST, or
+            // we're in the southern hemisphere and we've just entered STD, we'll
+            // be in here.  In both of these cases we've just done the first change
+            // of the year, so the next change will be later this year.
+            yearOfNextChange = date.getFullYear();
+        }
+        else
+        {
+            // Otherwise we're either in the sothernHempisphere and we've just entered DST
+            // or we'rte in the northern hemisphere and we've just entered STD.  In both
+            // these cases, we've just done the last change of the year, so next change
+            // is next year.
+            yearOfNextChange = date.getFullYear() + 1;
+        }
+        var dateOfNextChange;
+        var monthOfNextChange;
+        var hourOfNextChange
+        if (zone.is_dst)
+        {
+            // We just changed to DST, figure when the STD change will happen.
+            monthOfNextChange = zone.std_month;
+            // Subtract 1 because we're currently in DST, and we want these times ultimately in UTC
+            // That forces this to STD.
+            hourOfNextChange = zone.std_hour - 1;
+            dateOfNextChange = GetStartEndDay(yearOfNextChange, monthOfNextChange, zone.std_date, zone.std_dow);
+
+        }
+        else
+        {
+            // We just changed to STD, figure when the DST change will happen.
+            monthOfNextChange = zone.dst_month;
+            hourOfNextChange = zone.dst_hour;
+            dateOfNextChange = GetStartEndDay(yearOfNextChange, monthOfNextChange, zone.dst_date, zone.dst_dow);
+        }
+        //print("ComputeOffsetAndChange() says next change for zone " + idx + " is " + yearOfNextChange + "/" + monthOfNextChange + "/" + dateOfNextChange + ":" + hourOfNextChange);
+        const changeDate = new Date(yearOfNextChange, monthOfNextChange - 1, dateOfNextChange, hourOfNextChange, 0, 0, 0);
+        // All of the next change computation has been done on a Date object that's set to the STD timezone of
+        // zones[idx].  To keep things sane and easy, we want next_change to be in UTC, so we subtract the zone
+        // offset in milliseconds to get a UTC time
+        zones[idx].next_change = changeDate.getTime() - zoneOffset;
+        //print("ComputeOffsetAndChange() says changeSeconds is " + (Math.floor(zones[idx].next_change / 1000)));
     }
 }
 
 //function Render(date)
 //{
-//    print("" + date.getYear() + "/" + ("" + (date.GetMonth() + 1)).padStart(2, '0') + "/" + ("" + date.getDate()).padStart(2, '0') + " " +
+//    print("" + date.getFullYear() + "/" + ("" + (date.GetMonth() + 1)).padStart(2, '0') + "/" + ("" + date.getDate()).padStart(2, '0') + " " +
 //        ("" + date.getHours()).padStart(2, '0') + ":" + ("" + date.getMinutes()).padStart(2, '0') + ":" + ("" + date.getSeconds()).padStart(2, '0'));
 //}
 
 function draw()
 {
-    var date = GetDate(-1);
+    var date = GetDate(0);
 
     var y = 66;
 
@@ -173,7 +219,7 @@ function draw()
 /*
     // I hope this never gets used.  As long as the font has
     // monospaced numbers, we don't need this.  That's one
-    // of the nice properties of the Oxanium family, the
+    // of the nice properties of the Oxanium font family, the
     // numbers are monospaced.
     var digit = "" + Math.floor(hours / 10);
     g.drawString(digit, 19, y);     // x - 69
@@ -187,7 +233,7 @@ function draw()
 */
 
     g.setFont("OxaniumText");
-    var dow = date.getDay();
+    const dow = date.getDay();
     if (dow != lastDow)
     {
         lastDow = dow;
@@ -195,12 +241,12 @@ function draw()
         g.setColor(0, 0, 0).fillRect(0, y - 15, 176, y + 12);
         g.setColor(0, 1, 0).drawString(dows[dow], 37, y);
 
-        var month = date.getMonth() + 1;
-        var dateStr = "" + month + "/" + ("" + date.getDate()).padStart(2, '0');
+        const month = date.getMonth() + 1;
+        const dateStr = "" + month + "/" + ("" + date.getDate()).padStart(2, '0');
         // Move this a little left or right depending on whether the
         // month is one or two digits.  This has the net result of always
         // rendering the slash in the same place.
-        var x = month >= 10 ? 129 : 139;
+        const x = month >= 10 ? 129 : 139;
         g.drawString(dateStr, x, y);
     }
 
@@ -214,13 +260,14 @@ function draw()
     var zoneTimeStr = ("" + date.getHours()).padStart(2, '0') + ":" + ("" + date.getMinutes()).padStart(2, '0');
     g.drawString(zoneTimeStr, 131, y);
 
-    // For all zones, check if they observe DST, and if so check if their next chage time has passed.
-    // If so, compute the new offset, and the time of the next change after this one.
-    const now = new Date();
-    const currentMilliSeconds = now.getTime();
+    // For all zones, check if they observe DST, and if so check if their next change time has
+    // passed.  If so, compute the new offset and change time.  Changes are specified in UTC,
+    // so we use GetDate(-1) to get a Date object that's in UTC.
+    const now = GetDate(-1);
+    const currentUTCMilliSeconds = now.getTime();
     for (idx = 0; idx < zones.length; idx++)
     {
-        if (false && zones[idx].dst_month != zones[idx].std_month && currentMilliSeconds >= zones[idx].next_change)
+        if (zones[idx].dst_month != zones[idx].std_month && currentUTCMilliSeconds >= zones[idx].next_change)
         {
             ComputeOffsetAndChange(idx, idx + 1);
         }
@@ -230,12 +277,18 @@ function draw()
     // get to the top of the next minute.  Add 5 so this
     // actually causes draw() to get called at 5 ms after
     // the top of the minute.
-    var delayNeeded = 60005 - (date.getSeconds() * 1000 + date.getMilliseconds());
+    const delayNeeded = 60005 - (date.getSeconds() * 1000 + date.getMilliseconds());
     drawTimeout = setTimeout(draw, delayNeeded);
 }
 
 function onTouch(button, xy)
 {
+    if (zones.length == 2)
+    {
+        // If we only have one extra timezone, there's nothing to do.  Save the cost of
+        // a wasted draw call.
+        return;
+    }
     if (++zoneIndex >= zones.length)
     {
         zoneIndex = 1;
@@ -261,4 +314,3 @@ ComputeOffsetAndChange(0, zones.length);
 
 // Draw immediately.  Subsequent draw() calls are scheduled from within draw() and onTouch()
 draw();
-
