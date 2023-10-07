@@ -12,7 +12,7 @@
 
       <table id="travelwatch-offsets">
           <tr>
-          <th>Enabled?</th>
+          <th>Active</th>
           <th>Name</th>
           <th>Time Zone</th>
           </tr>
@@ -45,7 +45,7 @@
       { "name": "australia/darwin",      "offset":  570, "dst_month": 0, "dst_date":  0, "dst_dow": 0, "dst_hour": 0, "std_month":  0, "std_date":  0, "std_dow": 0, "std_hour": 0 },
       { "name": "australia/perth",       "offset":  480, "dst_month": 0, "dst_date":  0, "dst_dow": 0, "dst_hour": 0, "std_month":  0, "std_date":  0, "std_dow": 0, "std_hour": 0 },
       { "name": "etc/utc",               "offset":    0, "dst_month": 0, "dst_date":  0, "dst_dow": 0, "dst_hour": 0, "std_month":  0, "std_date":  0, "std_dow": 0, "std_hour": 0 }
-      ]
+      ];
 
       var offsets = [];
       try
@@ -76,8 +76,8 @@
       {
           var $offset = document.createElement('tr')
           var innerHTML = `
-              <td><input type="checkbox" id="enabled_${i}" ${offsets[i][0]? "checked" : ""}></td>
-              <td><input type="text" id="name_${i}" value="${offsets[i][1]}"></td>
+              <td><input type="checkbox" id="enabled_' + i + '" ${offsets[i][0]? "checked" : ""}></td>
+              <td><input type="text" width="20%" id="name_' + i + '" value="${offsets[i][1]}"></td>
               <td><select name="zone_${i}" id="zone_${i}">`
           for (var j = 0; j < timeZones.length; j++)
           {
@@ -100,10 +100,10 @@
           for (var i = 0; i < 5; i++)
           {
               // Always send the first two entries through.  Otherwise the watch face won't work right.
-              var checked = (i == 0 || i == 1) && document.getElementById("enabled_" + i).checked;
+              var checked = i == 0 || i == 1 || document.getElementById("enabled_" + i).checked;
               var name = document.getElementById("name_" + i).value;
               var zone = document.getElementById("zone_" + i).value;
-              console.log("Name: " + name + ", Zone: " + zone);
+              console.log("Checked:" + checked + ", Name: " + name + ", Zone: " + zone);
               if (checked)
               {
                   // Deep copy with JSON stringification and parsing.  This is because timeZones
