@@ -34,6 +34,17 @@ var zones = require("Storage").readJSON("timezones.json", 1) ||
     { "name": "LON", "offset":    0, "current_offset": 0, "next_change": 0, "is_dst": false, "dst_month": 3, "dst_date": -7, "dst_dow": 0, "dst_hour": 1, "std_month": 10, "std_date": -7, "std_dow": 0, "std_hour": 2 },
 ];
 
+// We use GetDate  () to get dates for rendering, since takes care of both the various timezones in use, and automatic switching between
+// daylight and standard times.  Rather than rely on the TZ offset stored in the watch, we start by removing that, and then applying our
+// idea of the offset.  ixd == -1 causes it to return a UTC Date object.
+function GetDate(idx)
+{
+    var date = new Date();
+    const zoneOffset = idx >= 0 && idx < zones.length ? zones[idx].current_offset : 0
+    date.setTime(date.getTime() + date.getTimezoneOffset() * 60000 + zoneOffset);
+    return date;
+}
+
 function DaysInMonth(year, month)
 {
     // Given the limited use case of this, I'm not sure we need the February logic.  As far as I can tell,
@@ -50,33 +61,33 @@ function DaysInMonth(year, month)
 }
 
 // Standard Zeller's congruence
-function DateToDow(year, month, day)
+function DateToDow(year, month, date)
 {
     if (month < 3)
     {
         month += 12;
         year--;
     }
-    return (day + Math.floor(((month + 1) * 13) / 5) + 6 + year + Math.floor(year / 4) - Math.floor(year / 100) + Math.floor(year / 400)) % 7;
+    return (date + Math.floor(((month + 1) * 13) / 5) + 6 + year + Math.floor(year / 4) - Math.floor(year / 100) + Math.floor(year / 400)) % 7;
 }
 
 // Returns the day of month of the first "dow" day starting from the date in the given month and year.
 // Negative date values mean count from end of month, so -7 is the last Xday, -14 is the seconds to last, etc.
-function YearToStartEndDay(year, month, day, dow)
+function YearToStartEndDay(year, month, date, dow)
 {
-    // Get the first possible day in the month that the change can happen, based on the day parameter.
-    const firstPossibleDay = day < 0 ? DaysInMonth(year, month) + 1 + day : day;
-    // Get the day of week of the first possible day
-    const dowOfFirstPossible = DateToDow(year, month, firstPossibleDay);
+    // Get the first possible date in the month that the change can happen, based on the date parameter.
+    const firstPossibleDate = date < 0 ? DaysInMonth(year, month) + 1 + date : date;
+    // Get the day of week of the first possible date
+    const dowOfFirstPossible = DateToDow(year, month, firstPossibleDate);
     // Determine how many days we need to advance from the first possible to arrive at a day that
     // is the appropriate day of the week
     const daysToAdvance = (7 + dow - dowOfFirstPossible) % 7;
     // Final result is the first possible plus the number of days advanced.
-    return firstPossibleDay + daysToAdvance;
+    return firstPossibleDate + daysToAdvance;
 }
 
-// Determine if a year, month, day, hour quartet are in DST for the zone idx
-function TimeIsDst(year, month, day, hours, idx)
+// Determine if a year, month, date, hour quartet are in DST for the zone idx
+function TimeIsDst(year, month, date, hours, idx)
 {
     var zone = zones[idx];
     // if both months are the same, this zone doesn't observe DST
@@ -97,10 +108,10 @@ function TimeIsDst(year, month, day, hours, idx)
     }
     if (month == zone.dst_month)
     {
-        // In the month when DST starts.  Get the date in the month when DST actually starts
-        const dstDay = YearToStartEndDay(year, zone.dst_month, zone.dst_date, zone.dst_dow);
+        // We're in the month when DST starts.  Get the date in the month when DST actually starts
+        const dstDate = YearToStartEndDay(year, zone.dst_month, zone.dst_date, zone.dst_dow);
         // and if we'er after that day, or on that day but after the hour, then it's DST
-        if (day > dstDay || day == dstDay && hours >= zone.dst_hour)
+        if (date > dstDate || date == dstDate && hours >= zone.dst_hour)
         {
             return true;
         }
@@ -108,8 +119,8 @@ function TimeIsDst(year, month, day, hours, idx)
     if (month == zone.std_month)
     {
         // Likewise for the month when DST ends
-        const stdDay = YearToStartEndDay(year, zone.std_month, zone.std_date, zone.std_dow);
-        if (day < stdDay || day == stdDay && hours < zone.std_hour - 1)
+        const stdDate = YearToStartEndDay(year, zone.std_month, zone.std_date, zone.std_dow);
+        if (date < stdDate || date == stdDate && hours < zone.std_hour - 1)
         {
             return true;
         }
@@ -118,19 +129,14 @@ function TimeIsDst(year, month, day, hours, idx)
 }
 
 // The current offset and next change logic is pretty expensive.  However it's run very infrequently:
-// once at startup, and then after that only two times a year.
+// once at startup, and then after that only two times a year for each zone
 
 // Evaluate offsets for the specified zone(s)
-function ComputeCurrentOffsets(first, last)
+function ComputeOffsetAndChange(first, last)
 {
-    const now = new Date();
-    const utcMilliSeconds = now.getTime();
     for (idx = first; idx < last; idx++)
     {
-        var zoneOffset = zones[idx].offset * 60000;             // zone offset is in minutes: convert to milliseconds
-        var zoneMilliSeconds = utcMilliSeconds + zoneOffset;
-        var date = new Date();
-        date.setTime(zoneMilliSeconds);
+        var date = GetDate(idx);
         if (TimeIsDst(date.getFullYear(), date.getMonth() + 1, date.getDate(), date.getHours(), idx))
         {
             zones[idx].current_offset = zoneOffset + 3600000;
@@ -144,33 +150,15 @@ function ComputeCurrentOffsets(first, last)
     }
 }
 
-function ComputeNextChanges(first, last)
-{
-    const now = new Date();
-    for (idx = first; idx < last; idx++)
-    {
-    }
-}
-
 //function Render(date)
 //{
 //    print("" + date.getYear() + "/" + ("" + (date.GetMonth() + 1)).padStart(2, '0') + "/" + ("" + date.getDate()).padStart(2, '0') + " " +
 //        ("" + date.getHours()).padStart(2, '0') + ":" + ("" + date.getMinutes()).padStart(2, '0') + ":" + ("" + date.getSeconds()).padStart(2, '0'));
 //}
 
-// We use GetDate() to get dates for rendering, since takes care of both the various timezones in use, and automatic switching between
-// daylight and standard times.  Rather than rely on the TZ offset stored in the watch, we start by removing that, and then applying our
-// idea of the offset.
-function GetDate(idx)
-{
-    var date = new Date();
-    date.setTime(date.getTime() + date.getTimezoneOffset() * 60000 + zones[idx].current_offset);
-    return date;
-}
-
 function draw()
 {
-    var date = GetDate(0);
+    var date = GetDate(-1);
 
     var y = 66;
 
@@ -233,8 +221,7 @@ function draw()
     {
         if (false && zones[idx].dst_month != zones[idx].std_month && currentMilliSeconds >= zones[idx].next_change)
         {
-            ComputeCurrentOffsets(idx, idx + 1);
-            ComputeNextChanges(idx, idx + 1);
+            ComputeOffsetAndChange(idx, idx + 1);
         }
     }
 
@@ -269,9 +256,7 @@ Bangle.on("touch", onTouch);
 // Make sure the middle button works properly
 Bangle.setUI({mode:"clock"});
 
-ComputeCurrentOffsets(0, zones.length);
-ComputeNextChanges(0, zones.length);
+ComputeOffsetAndChange(0, zones.length);
 
 // Draw immediately.  Subsequent draw() calls are scheduled from within draw() and onTouch()
 draw();
-
