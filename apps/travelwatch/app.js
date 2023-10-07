@@ -27,11 +27,14 @@ const dows =
     "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
 ];
 
-var zones = require("Storage").readJSON("timezones.json", 1) ||
-[
-    { "name": "SFO", "offset": -480, "current_offset": 0, "next_change": 0, "is_dst": false, "dst_month": 3, "dst_date":  8, "dst_dow": 0, "dst_hour": 2, "std_month": 11, "std_date":  1, "std_dow": 0, "std_hour": 2 },
-    { "name": "LON", "offset":    0, "current_offset": 0, "next_change": 0, "is_dst": false, "dst_month": 3, "dst_date": -7, "dst_dow": 0, "dst_hour": 1, "std_month": 10, "std_date": -7, "std_dow": 0, "std_hour": 2 },
-];
+var zones = require("Storage").readJSON("timezones.json", 1);
+if (!zones || zones.length < 2)
+{
+    zones = [
+        { "name": "SFO", "offset": -480, "current_offset": -28800000, "next_change": 0, "is_dst": false, "dst_month": 3, "dst_date":  8, "dst_dow": 0, "dst_hour": 2, "std_month": 11, "std_date":  1, "std_dow": 0, "std_hour": 2 },
+        { "name": "LON", "offset":    0, "current_offset":         0, "next_change": 0, "is_dst": false, "dst_month": 3, "dst_date": -7, "dst_dow": 0, "dst_hour": 1, "std_month": 10, "std_date": -7, "std_dow": 0, "std_hour": 2 },
+    ];
+}
 
 // We use GetDate() to get dates for rendering, since it takes care of both the various timezones in use, and automatic switching between
 // daylight and standard times.  Rather than rely on the TZ offset stored in the watch, we start by removing that, and then applying our
