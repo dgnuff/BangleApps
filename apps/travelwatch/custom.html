@@ -103,6 +103,7 @@
               var checked = (i == 0 || i == 1) && document.getElementById("enabled_" + i).checked;
               var name = document.getElementById("name_" + i).value;
               var zone = document.getElementById("zone_" + i).value;
+              console.log("Name: " + name + ", Zone: " + zone);
               if (checked)
               {
                   // Deep copy with JSON stringification and parsing.  This is because timeZones
