@@ -12,9 +12,9 @@
 
       <table id="travelwatch-offsets">
           <tr>
-          <th>Active</th>
+          <th style="width:20%">Active</th>
           <th style="width:20%">Name</th>
-          <th>Time Zone</th>
+          <th style="width:60%">Time Zone</th>
           </tr>
       </table>
 
@@ -76,9 +76,9 @@
       {
           var $offset = document.createElement('tr')
           var innerHTML = `
-              <td><input type="checkbox" id="enabled_${i}" ${offsets[i][0]? "checked" : ""}></td>
-              <td><input type="text" style="width:20%" id="name_${i}" value="${offsets[i][1]}"></td>
-              <td><select name="zone_${i}" id="zone_${i}">`
+              <td><input type="checkbox" style="width:100%" id="enabled_${i}" ${offsets[i][0]? "checked" : ""}></td>
+              <td><input type="text" style="width:100%" id="name_${i}" value="${offsets[i][1]}"></td>
+              <td><select name="zone_${i}" style="width:100%" id="zone_${i}">`
           for (var j = 0; j < timeZones.length; j++)
           {
               innerHTML += '<option value="' + j + '"'
