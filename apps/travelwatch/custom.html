@@ -24,27 +24,27 @@
 
     <script>
       const timeZones = [
-      { "name": "pacific/honolulu",      "offset": -600, "dst_month": 0, "dst_date":  0, "dst_dow": 0, "dst_hour": 0, "std_month":  0, "std_date":  0, "std_dow": 0, "std_hour": 0 },
-      { "name": "america/anchorage",     "offset": -540, "dst_month": 3, "dst_date":  8, "dst_dow": 0, "dst_hour": 2, "std_month": 11, "std_date":  1, "std_dow": 0, "std_hour": 2 },
-      { "name": "america/los_angeles",   "offset": -480, "dst_month": 3, "dst_date":  8, "dst_dow": 0, "dst_hour": 2, "std_month": 11, "std_date":  1, "std_dow": 0, "std_hour": 2 },
-      { "name": "america/phoenix",       "offset": -420, "dst_month": 0, "dst_date":  0, "dst_dow": 0, "dst_hour": 0, "std_month":  0, "std_date":  0, "std_dow": 0, "std_hour": 0 },
-      { "name": "america/denver",        "offset": -420, "dst_month": 3, "dst_date":  8, "dst_dow": 0, "dst_hour": 2, "std_month": 11, "std_date":  1, "std_dow": 0, "std_hour": 2 },
-      { "name": "america/chicago",       "offset": -360, "dst_month": 3, "dst_date":  8, "dst_dow": 0, "dst_hour": 2, "std_month": 11, "std_date":  1, "std_dow": 0, "std_hour": 2 },
-      { "name": "america/new_york",      "offset": -300, "dst_month": 3, "dst_date":  8, "dst_dow": 0, "dst_hour": 2, "std_month": 11, "std_date":  1, "std_dow": 0, "std_hour": 2 },
-      { "name": "america/sao_paulo",     "offset": -180, "dst_month": 0, "dst_date":  0, "dst_dow": 0, "dst_hour": 0, "std_month":  0, "std_date":  0, "std_dow": 0, "std_hour": 0 },
-      { "name": "europe/london",         "offset":    0, "dst_month": 3, "dst_date": -7, "dst_dow": 0, "dst_hour": 1, "std_month": 10, "std_date": -7, "std_dow": 0, "std_hour": 2 },
-      { "name": "europe/lisbon",         "offset":    0, "dst_month": 3, "dst_date": -7, "dst_dow": 0, "dst_hour": 1, "std_month": 10, "std_date": -7, "std_dow": 0, "std_hour": 2 },
-      { "name": "europe/berlin",         "offset":   60, "dst_month": 3, "dst_date": -7, "dst_dow": 0, "dst_hour": 2, "std_month": 10, "std_date": -7, "std_dow": 0, "std_hour": 3 },
-      { "name": "europe/athens",         "offset":  120, "dst_month": 3, "dst_date": -7, "dst_dow": 0, "dst_hour": 3, "std_month": 10, "std_date": -7, "std_dow": 0, "std_hour": 4 },
-      { "name": "africa/johannesburg",   "offset":  120, "dst_month": 0, "dst_date":  0, "dst_dow": 0, "dst_hour": 0, "std_month":  0, "std_date":  0, "std_dow": 0, "std_hour": 0 },
-      { "name": "asia/jerusalem",        "offset":  120, "dst_month": 3, "dst_date": -9, "dst_dow": 5, "dst_hour": 2, "std_month": 10, "std_date": -7, "std_dow": 0, "std_hour": 2 },
-      { "name": "asia/tokyo",            "offset":  540, "dst_month": 0, "dst_date":  0, "dst_dow": 0, "dst_hour": 0, "std_month":  0, "std_date":  0, "std_dow": 0, "std_hour": 0 },
-      { "name": "australia/sydney",      "offset":  600, "dst_month": 0, "dst_date":  1, "dst_dow": 0, "dst_hour": 2, "std_month":  4, "std_date":  1, "std_dow": 0, "std_hour": 2 },
-      { "name": "australia/brisbane",    "offset":  600, "dst_month": 0, "dst_date":  0, "dst_dow": 0, "dst_hour": 0, "std_month":  0, "std_date":  0, "std_dow": 0, "std_hour": 0 },
-      { "name": "australia/adelaide",    "offset":  570, "dst_month": 0, "dst_date":  1, "dst_dow": 0, "dst_hour": 2, "std_month":  4, "std_date":  1, "std_dow": 0, "std_hour": 2 },
-      { "name": "australia/darwin",      "offset":  570, "dst_month": 0, "dst_date":  0, "dst_dow": 0, "dst_hour": 0, "std_month":  0, "std_date":  0, "std_dow": 0, "std_hour": 0 },
-      { "name": "australia/perth",       "offset":  480, "dst_month": 0, "dst_date":  0, "dst_dow": 0, "dst_hour": 0, "std_month":  0, "std_date":  0, "std_dow": 0, "std_hour": 0 },
-      { "name": "etc/utc",               "offset":    0, "dst_month": 0, "dst_date":  0, "dst_dow": 0, "dst_hour": 0, "std_month":  0, "std_date":  0, "std_dow": 0, "std_hour": 0 }
+      { "name": "Pacific/Honolulu",      "offset": -600, "dst_month":  0, "dst_date":  0, "dst_dow": 0, "dst_hour": 0, "std_month":  0, "std_date":  0, "std_dow": 0, "std_hour": 0 },
+      { "name": "America/Anchorage",     "offset": -540, "dst_month":  3, "dst_date":  8, "dst_dow": 0, "dst_hour": 2, "std_month": 11, "std_date":  1, "std_dow": 0, "std_hour": 2 },
+      { "name": "America/Los_Angeles",   "offset": -480, "dst_month":  3, "dst_date":  8, "dst_dow": 0, "dst_hour": 2, "std_month": 11, "std_date":  1, "std_dow": 0, "std_hour": 2 },
+      { "name": "America/Phoenix",       "offset": -420, "dst_month":  0, "dst_date":  0, "dst_dow": 0, "dst_hour": 0, "std_month":  0, "std_date":  0, "std_dow": 0, "std_hour": 0 },
+      { "name": "America/Denver",        "offset": -420, "dst_month":  3, "dst_date":  8, "dst_dow": 0, "dst_hour": 2, "std_month": 11, "std_date":  1, "std_dow": 0, "std_hour": 2 },
+      { "name": "America/Chicago",       "offset": -360, "dst_month":  3, "dst_date":  8, "dst_dow": 0, "dst_hour": 2, "std_month": 11, "std_date":  1, "std_dow": 0, "std_hour": 2 },
+      { "name": "America/New_York",      "offset": -300, "dst_month":  3, "dst_date":  8, "dst_dow": 0, "dst_hour": 2, "std_month": 11, "std_date":  1, "std_dow": 0, "std_hour": 2 },
+      { "name": "America/Sao_Paulo",     "offset": -180, "dst_month":  0, "dst_date":  0, "dst_dow": 0, "dst_hour": 0, "std_month":  0, "std_date":  0, "std_dow": 0, "std_hour": 0 },
+      { "name": "Europe/London",         "offset":    0, "dst_month":  3, "dst_date": -7, "dst_dow": 0, "dst_hour": 1, "std_month": 10, "std_date": -7, "std_dow": 0, "std_hour": 2 },
+      { "name": "Europe/Lisbon",         "offset":    0, "dst_month":  3, "dst_date": -7, "dst_dow": 0, "dst_hour": 1, "std_month": 10, "std_date": -7, "std_dow": 0, "std_hour": 2 },
+      { "name": "Europe/Berlin",         "offset":   60, "dst_month":  3, "dst_date": -7, "dst_dow": 0, "dst_hour": 2, "std_month": 10, "std_date": -7, "std_dow": 0, "std_hour": 3 },
+      { "name": "Europe/Athens",         "offset":  120, "dst_month":  3, "dst_date": -7, "dst_dow": 0, "dst_hour": 3, "std_month": 10, "std_date": -7, "std_dow": 0, "std_hour": 4 },
+      { "name": "Africa/Johannesburg",   "offset":  120, "dst_month":  0, "dst_date":  0, "dst_dow": 0, "dst_hour": 0, "std_month":  0, "std_date":  0, "std_dow": 0, "std_hour": 0 },
+      { "name": "Asia/Jerusalem",        "offset":  120, "dst_month":  3, "dst_date": -9, "dst_dow": 5, "dst_hour": 2, "std_month": 10, "std_date": -7, "std_dow": 0, "std_hour": 2 },
+      { "name": "Asia/Tokyo",            "offset":  540, "dst_month":  0, "dst_date":  0, "dst_dow": 0, "dst_hour": 0, "std_month":  0, "std_date":  0, "std_dow": 0, "std_hour": 0 },
+      { "name": "Australia/Sydney",      "offset":  600, "dst_month": 10, "dst_date":  1, "dst_dow": 0, "dst_hour": 2, "std_month":  4, "std_date":  1, "std_dow": 0, "std_hour": 2 },
+      { "name": "Australia/Brisbane",    "offset":  600, "dst_month":  0, "dst_date":  0, "dst_dow": 0, "dst_hour": 0, "std_month":  0, "std_date":  0, "std_dow": 0, "std_hour": 0 },
+      { "name": "Australia/Adelaide",    "offset":  570, "dst_month": 10, "dst_date":  1, "dst_dow": 0, "dst_hour": 2, "std_month":  4, "std_date":  1, "std_dow": 0, "std_hour": 2 },
+      { "name": "Australia/Darwin",      "offset":  570, "dst_month":  0, "dst_date":  0, "dst_dow": 0, "dst_hour": 0, "std_month":  0, "std_date":  0, "std_dow": 0, "std_hour": 0 },
+      { "name": "Australia/Perth",       "offset":  480, "dst_month":  0, "dst_date":  0, "dst_dow": 0, "dst_hour": 0, "std_month":  0, "std_date":  0, "std_dow": 0, "std_hour": 0 },
+      { "name": "Etc/UTC",               "offset":    0, "dst_month":  0, "dst_date":  0, "dst_dow": 0, "dst_hour": 0, "std_month":  0, "std_date":  0, "std_dow": 0, "std_hour": 0 }
       ];
 
       var offsets = [];
@@ -70,7 +70,6 @@
                 [false, "SYD", 15 ],
            ];
         }
-      console.log(offsets);
       var tbl = document.getElementById("travelwatch-offsets");
       for (var i = 0; i < 5; i++)
       {
@@ -103,7 +102,6 @@
               var checked = i == 0 || i == 1 || document.getElementById("enabled_" + i).checked;
               var name = document.getElementById("name_" + i).value;
               var zone = document.getElementById("zone_" + i).value;
-              console.log("Checked:" + checked + ", Name: " + name + ", Zone: " + zone);
               if (checked)
               {
                   // Deep copy with JSON stringification and parsing.  This is because timeZones
@@ -120,16 +118,16 @@
               }
               storage_offsets.push([checked,name,zone]);
           }
-          console.log(storage_offsets);
-          console.log(app_offsets);
-          console.log(JSON.stringify(app_offsets));
+          //console.log(storage_offsets);
+          //console.log(app_offsets);
+          //console.log(JSON.stringify(app_offsets));
         localStorage.setItem('travelwatch-offset-list',JSON.stringify(storage_offsets));
         // send finished app (in addition to contents of app.json)
-        //sendCustomizedApp({
-        //  storage:[
-        //    {name:"timezones.json", content:JSON.stringify(app_offsets)},
-        //  ]
-        //});
+        sendCustomizedApp({
+          storage:[
+            {name:"timezones.json", content:JSON.stringify(app_offsets)},
+          ]
+        });
       });
 
     </script>
