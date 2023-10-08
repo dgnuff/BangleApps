@@ -302,7 +302,7 @@ function onTouch(button, xy)
     {
         if (++zoneIndex >= zones.length)
         {
-            zoneIndex = 1;
+            zoneIndex = 0;
         }
     } while (zoneIndex == watchIndex);
     clearTimeout(drawTimeout);
