@@ -1,5 +1,6 @@
 var lastDow;
 var drawTimeout;
+var watchIndex;
 var zoneIndex;
 
 Graphics.prototype.setFontOxaniumTime = function() {
@@ -208,7 +209,7 @@ function ComputeOffsetAndChange(first, last)
 
 function draw()
 {
-    var date = GetDate(0);
+    var date = GetDate(watchIndex);
 
     var y = 66;
 
@@ -286,22 +287,31 @@ function draw()
 
 function onTouch(button, xy)
 {
-    if (zones.length == 2)
+    if (xy.type == 2)
     {
-        // If we only have one extra timezone, there's nothing to do.  Save the cost of
-        // a wasted draw call.
+        // Long touch: make the current selected travel zone the main watch zone.
+        watchIndex = zoneIndex;
+        // Don't need to do anything else, the remaining logic will sort out the travel zone
+    }
+    else if (zones.length == 2)
+    {
+        // Short touch and we only have two zones.  Nothing to do, so return immediately
         return;
     }
-    if (++zoneIndex >= zones.length)
+    do
     {
-        zoneIndex = 1;
-    }
+        if (++zoneIndex >= zones.length)
+        {
+            zoneIndex = 1;
+        }
+    } while (zoneIndex == watchIndex);
     clearTimeout(drawTimeout);
     draw();
 }
 
 // Clear the screen once, at startup
 g.clear().setColor(0, 0, 0).fillRect(0, 0, 176, 176);
+watchIndex = 0;
 zoneIndex = 1;
 
 Bangle.loadWidgets();
